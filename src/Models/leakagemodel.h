@@ -30,15 +30,16 @@ class LeakageModel
                                   const std::string model,
                                   const double ucfLength_,
                                   const double ucfFlow_);
-    virtual double findFlow(const double c1,
-                            const double c2,
-                            const double length,
+    virtual double findFlow(double c1,
+                            double c2,
+                            double length,
                             double h,
                             double& dqdh) = 0;
 
   protected:
     double lengthUcf;
     double flowUcf;
+    double pressureUcf;
 };
 
 //-----------------------------------------------------------------------------
@@ -50,10 +51,7 @@ class PowerLeakageModel : public LeakageModel
 {
   public:
     PowerLeakageModel(const double ucfLength_, const double ucfFlow_);
-    double findFlow(double flowCoeff,
-                    double expon,
-                    double length,
-                    double h,
+    double findFlow(double flowCoeff, double expon, double length, double h,
                     double& dqdh);
 };
 
@@ -67,11 +65,7 @@ class FavadLeakageModel : public LeakageModel
 {
   public:
     FavadLeakageModel(const double ucfLength_);
-    double findFlow(double area,
-                    double m,
-                    double length,
-                    double h,
-                    double& dqdh);
+    double findFlow(double area, double slope, double length, double h, double& dqdh);
 };
 
 #endif /* LEAKAGEMODEL_H_ */
