@@ -186,10 +186,10 @@ int        EN_initSolver(int initFlows, EN_Project p);
 int        EN_runSolver(int* t, EN_Project p);
 int        EN_advanceSolver(int* dt, EN_Project p);
 
-int        EN_openOutputFile(const char* fname, EN_Project p);
+int        EN_openOutput(const char* fname, EN_Project p);
 int        EN_saveOutput(EN_Project p);
 
-int        EN_openReportFile(const char* fname, EN_Project p);
+int        EN_openReport(const char* fname, EN_Project p);
 int        EN_writeReport(EN_Project p);
 int        EN_writeSummary(EN_Project p);
 int        EN_writeResults(int t, EN_Project p);
