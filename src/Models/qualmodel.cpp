@@ -41,6 +41,7 @@ QualModel* QualModel::factory(const string model)
     if ( model == "CHEMICAL" ) return new ChemModel();
     if ( model == "TRACE" )    return new TraceModel();
     if ( model == "AGE" )      return new AgeModel();
+	if (model == "VCDM")	return new VCDMModel();  //Added RPC 13/02/19
     return nullptr;
 }
 
@@ -300,3 +301,96 @@ double AgeModel::tankReact(Tank* tank, double age, double tstep)
 {
     return age + tstep / 3600.0 * LperFT3;
 }
+
+
+//Added RPC 13/02/19
+//-----------------------------------
+//	VCDM Model 
+//------------------------------------
+
+VCDMModel::VCDMModel() : QualModel(VCDM)
+{
+	reactive = true;       // true if chemical is reactive
+	diffus = DIFFUSIVITY;   // chemical's diffusivity (ft2/sec)
+	viscos = VISCOSITY;     // water kin. viscosity (ft2/sec)
+	Sc = 0.0;               // Schmidt number
+	VCDM_alpha = 1.0;        // pipe bulk fluid reaction order
+	VCDM_beta_e = 1.0;        // tank bulk fluid reaction order
+	VCDM_beta_r = 1.0;        // pipe wall reaction order
+	pipeUcf = 1.0;          // volume conversion factor for pipes
+	tankUcf = 1.0;          // volume conversion factor for tanks
+	cLimit = 0.001;         // min/max concentration limit (mass/ft3)
+}
+
+
+void VCDMModel::init(Network* nw)
+{
+	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
+	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
+	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
+
+	//reactive = setReactive(nw);
+	/*vcdmNode = nw->node(nw->option(Options::VCDM_NODE));
+	vcdmNode->quality = Cvcdm;*/
+	/*for (Link* link : nw->links)
+	{
+		if (link->isReactive()) return true;
+		link.
+	}
+	*/
+}
+
+double VCDMModel::pipeReact(Pipe* pipe, double tstep)
+{
+	double dCdT = 0.0;
+	double pipe_shear = pipe.
+
+	double kb = pipe->bulkCoeff / SECperDAY;
+	if (kb != 0.0) dCdT = findBulkRate(kb, pipeOrder, c) * pipeUcf;
+
+	double kw = pipe->wallCoeff / SECperDAY;
+	if (kw != 0.0) dCdT += findWallRate(kw, pipe->diameter, wallOrder, c);
+
+	c = c + dCdT * tstep;
+	return max(0.0, c);
+}
+
+void VCDMModel::findMassTransCoeff(Pipe * pipe)
+{
+	massTransCoeff = 0.0;
+
+	// ... return if no wall reaction or zero diffusivity
+	if (pipe->wallCoeff == 0.0) return;
+	if (diffus == 0.0) return;
+
+	// ... compute Reynolds No.
+	double d = pipe->diameter;
+	double Re = pipe->getRe(pipe->flow, viscos);
+
+	// ... Sherwood No. for stagnant flow
+	//     (mass transfer coeff. = diffus./radius)
+	double Sh;
+	if (Re < 1.0) Sh = 2.0;
+
+	// ... Sherwood No. for turbulent flow
+	//     (from Notter-Sleicher formula) (Cussler formula)
+	else if (Re >= 2300.0)
+	{
+		//Sh = 0.0149 * pow(Re, 0.88) * pow(Sc, 0.333);
+		Sh = 0.026 * pow(Re, 0.8) * pow(Sc, 1.0 / 3.0);
+	}
+
+	// ... Sherwood No. for laminar flow
+	//     (from Graetz solution formula) (Cussler formula)
+	else
+	{
+		//double y = diam / length * Re * Sc;
+		//Sh = 3.65 + 0.0668*y / (1.0 + 0.04*pow(y, 0.667));
+		double y = Re * Sc * (d / pipe->length);
+		Sh = 1.62 * pow(y, 1.0 / 3.0);
+	}
+
+	// ... compute mass transfer coeff. (in ft/sec)
+	massTransCoeff = Sh * diffus / d;
+}
+

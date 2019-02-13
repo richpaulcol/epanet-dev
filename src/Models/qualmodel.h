@@ -33,7 +33,8 @@ class QualModel
         NOQUAL,          // no quality model
         AGE,             // water age
         TRACE,           // source tracing
-        CHEM};           // chemical constituent
+        CHEM,				// chemical constituent
+		VCDM};           // turbidity constituent
 
     QualModel(int _type);
     virtual ~QualModel() = 0;
@@ -126,5 +127,35 @@ class AgeModel : public QualModel
     double pipeReact(Pipe* pipe, double age, double tstep);
     double tankReact(Tank* tank, double age, double tstep);
 };
+
+//-----------------------------------------------------------------------------
+//! \class VCDMModel
+//! \Turbidity Model
+// Added RPC 13/02/19
+//-----------------------------------------------------------------------------
+
+class VCDMModel : public QualModel
+{
+public:
+	VCDMModel();
+	void   init(Network* nw);
+	double pipeReact(Pipe* pipe, double tstep);
+	void   findMassTransCoeff(Pipe* pipe);
+	bool   isReactive() { return reactive; }
+
+private:
+	bool    reactive;         // true if chemical is reactive
+	double  diffus;           // chemical's diffusuivity (ft2/sec)
+	double  viscos;           // water kin. viscosity (ft2/sec)
+	double  Sc;               // Schmidt number
+	double  VCDM_alpha;       // 
+	double  VCDM_beta_e;      // 
+	double  VCDM_beta_r;      // 
+	double  massTransCoeff;   // a pipe's mass transfer coeff. (ft/sec)
+	double  pipeUcf;          // volume conversion factor for pipes
+	double  tankUcf;          // volume conversion factor for tanks
+	double  cLimit;           // min/max concentration limit (mass/ft3)
+};
+
 
 #endif

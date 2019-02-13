@@ -50,10 +50,12 @@ static const char* leakageModelWords[] =
     {"NONE", "POWER", "FAVAD", 0};
 
 // Quality model keywords
-static const char* qualModelWords[] = {"NONE", "AGE", "TRACE", "CHEMICAL", 0};
+static const char* qualModelWords[] = {"NONE", "AGE", "TRACE", "CHEMICAL", "TURBIDITY",0};
+//  Turbitity added by RPC 13/02/19
 
 // Quality units keywords
-static const char* qualUnitsWords[] = {"", "HRS", "PCNT", "MG/L", "UG/L", 0};
+static const char* qualUnitsWords[] = {"", "HRS", "PCNT", "MG/L", "UG/L", "TPMU",0};
+//  TPMU added by RPC 13/02/19
 
 // File mode keywords
 //static const char* w_Use  = "USE";
