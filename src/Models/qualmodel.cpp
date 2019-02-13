@@ -342,8 +342,21 @@ void VCDMModel::init(Network* nw)
 
 double VCDMModel::pipeReact(Pipe* pipe, double tstep)
 {
+	const float g   = 9.81;   /* m/s^2 */
+  	const float rho = 1000.0; /* kg/m^3 */
+  	
+  	float flow, diam, tau_applied, grad;
+  	
+  	diam = pipe.Diam*MperFT; /* m */
+        //flow = fabs(Q[k]*LPSperCFS/1000.0);      /* m^3 */
+	grad = pipe.grad
+	
+	
+	tau_applied = rho*g*diam*sf/4.0;
+	
 	double dCdT = 0.0;
-	double pipe_shear = pipe.
+	//double pipe_shear = pipe.
+	
 
 	double kb = pipe->bulkCoeff / SECperDAY;
 	if (kb != 0.0) dCdT = findBulkRate(kb, pipeOrder, c) * pipeUcf;
