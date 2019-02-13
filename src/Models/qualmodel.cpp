@@ -41,7 +41,7 @@ QualModel* QualModel::factory(const string model)
     if ( model == "CHEMICAL" ) return new ChemModel();
     if ( model == "TRACE" )    return new TraceModel();
     if ( model == "AGE" )      return new AgeModel();
-	if (model == "VCDM")	return new VCDMModel();  //Added RPC 13/02/19
+    if ( model == "VCDM")	return new VCDMModel();  //Added RPC 13/02/19
     return nullptr;
 }
 
@@ -70,8 +70,8 @@ ChemModel::ChemModel() : QualModel(CHEM)
 
 void ChemModel::init(Network* nw)
 {
+    cout << "Chem";
     reactive = setReactive(nw);
-
     // save reaction orders
     pipeOrder = nw->option(Options::BULK_ORDER);
     tankOrder = nw->option(Options::TANK_ORDER);
@@ -168,6 +168,7 @@ double ChemModel::pipeReact(Pipe* pipe, double c, double tstep)
     if ( kw != 0.0 ) dCdT += findWallRate(kw, pipe->diameter, wallOrder, c);
 
     c = c + dCdT * tstep;
+    
     return max(0.0, c);
 }
 
@@ -270,6 +271,7 @@ double ChemModel::findWallRate(double kw, double d, double order, double c)
 
 void TraceModel::init(Network* nw)
 {
+    cout << "Trace";
     traceNode = nw->node(nw->option(Options::TRACE_NODE));
     traceNode->quality = Ctrace;
 }
@@ -325,9 +327,12 @@ VCDMModel::VCDMModel() : QualModel(VCDM)
 
 void VCDMModel::init(Network* nw)
 {
+	cout <<"VCDM";
 	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
 	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
 	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
+	
+	
 
 	//reactive = setReactive(nw);
 	/*vcdmNode = nw->node(nw->option(Options::VCDM_NODE));
@@ -340,31 +345,21 @@ void VCDMModel::init(Network* nw)
 	*/
 }
 
-double VCDMModel::pipeReact(Pipe* pipe, double tstep)
+double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
 {
 	const float g   = 9.81;   /* m/s^2 */
   	const float rho = 1000.0; /* kg/m^3 */
   	
-  	float flow, diam, tau_applied, grad;
-  	
-  	diam = pipe.Diam*MperFT; /* m */
-        //flow = fabs(Q[k]*LPSperCFS/1000.0);      /* m^3 */
-	grad = pipe.grad
-	
-	
-	tau_applied = rho*g*diam*sf/4.0;
-	
-	double dCdT = 0.0;
-	//double pipe_shear = pipe.
-	
+  	double diam = pipe->diameter*MperFT;  //Diameter in M
+  	double flow = pipe->flow*LPSperCFS/1000.0; // Flow in m^3
 
-	double kb = pipe->bulkCoeff / SECperDAY;
-	if (kb != 0.0) dCdT = findBulkRate(kb, pipeOrder, c) * pipeUcf;
-
-	double kw = pipe->wallCoeff / SECperDAY;
-	if (kw != 0.0) dCdT += findWallRate(kw, pipe->diameter, wallOrder, c);
-
-	c = c + dCdT * tstep;
+	double sf = pipe->hLoss / pipe->length;
+	
+	double tau_applied = abs(rho*g*diam*sf/4.0);
+	cout << tau_applied << "\n";
+	
+	c = c + 1;//dCdT * tstep;    // c is the concentration at this point
+	
 	return max(0.0, c);
 }
 

@@ -50,11 +50,11 @@ static const char* leakageModelWords[] =
     {"NONE", "POWER", "FAVAD", 0};
 
 // Quality model keywords
-static const char* qualModelWords[] = {"NONE", "AGE", "TRACE", "CHEMICAL", "TURBIDITY",0};
+static const char* qualModelWords[] = {"NONE", "AGE", "TRACE", "CHEMICAL", "VCDM",0};
 //  Turbitity added by RPC 13/02/19
 
 // Quality units keywords
-static const char* qualUnitsWords[] = {"", "HRS", "PCNT", "MG/L", "UG/L", "TPMU",0};
+static const char* qualUnitsWords[] = {"", "HRS", "PCNT", "MG/L", "TPMU",0};
 //  TPMU added by RPC 13/02/19
 
 // File mode keywords
@@ -184,6 +184,7 @@ int Options::setOption(StringOption option, const string& value)
 
     case QUAL_MODEL:
         i = Utilities::findFullMatch(value, qualModelWords);
+        //cout << i;
         if ( i < 0 )
         {
             stringOptions[QUAL_MODEL] = "CHEMICAL";
@@ -194,6 +195,7 @@ int Options::setOption(StringOption option, const string& value)
         else
         {
             stringOptions[QUAL_MODEL] = qualModelWords[i];
+            stringOptions[QUAL_UNITS_NAME] = qualUnitsWords[i];
             indexOptions[QUAL_TYPE]   = i;
             if ( indexOptions[QUAL_TYPE] != CHEM )
             {
@@ -209,6 +211,7 @@ int Options::setOption(StringOption option, const string& value)
 
     case QUAL_UNITS_NAME:
         i = Utilities::findFullMatch(value, qualUnitsWords);
+        cout << i;
         if (i < 0) return InputError::INVALID_KEYWORD;;
         if ( i == MGL || i == UGL ) indexOptions[QUAL_UNITS] = i;
         break;

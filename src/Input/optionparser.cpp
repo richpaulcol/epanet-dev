@@ -67,7 +67,7 @@ static const char* epanet2Keywords[] =
      "PATTERN", "DEMAND", "EMITTER","TOLERANCE", "MAP", 0};
 
 static const char* epanetQualKeywords[] =
-    {"NONE", "CHEMICAL", "AGE", "TRACE", 0};
+    {"NONE", "CHEMICAL", "AGE", "TRACE", "VCDM", 0};
 
 //-----------------------------------------------------------------------------
 
@@ -458,6 +458,8 @@ void OptionParser::parseQualOption(const string& s2, const string& s3,
     int i = Utilities::findFullMatch(s2U, epanetQualKeywords);
     if ( i >= 0 )
     {
+        //cout << i;
+        //cout << s2U;
         network->options.setOption(Options::QUAL_MODEL, s2U);
         network->options.setOption(Options::QUAL_NAME, s2U);
         network->options.setOption(Options::QUAL_TYPE, i);

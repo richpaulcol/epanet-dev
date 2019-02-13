@@ -139,7 +139,7 @@ class VCDMModel : public QualModel
 public:
 	VCDMModel();
 	void   init(Network* nw);
-	double pipeReact(Pipe* pipe, double tstep);
+	double pipeReact(Pipe* pipe, double c, double tstep);
 	void   findMassTransCoeff(Pipe* pipe);
 	bool   isReactive() { return reactive; }
 

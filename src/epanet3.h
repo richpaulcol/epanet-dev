@@ -110,7 +110,8 @@ enum QualModelTypes {
     EN_NONE,         //0
     EN_CHEM,         //1
     EN_AGE ,         //2
-    EN_TRACE};       //3
+    EN_TRACE,	     //3
+    EN_VCDM};       //4
 
 enum QualSourceTypes {
     EN_CONCEN,       //0
