@@ -9,7 +9,7 @@ No_tanks = 0
 No_pumps = 0
 No_periods = 3
 
-f = open("Simple.out",'rb')
+f = open("Example1.out",'rb')
 Prolog = f.read(84)
 EnergyUse = f.read(4)
 EPS = f.read()
@@ -26,6 +26,8 @@ NodeDataSize = PrologData[-3]
 LinkDataSize = PrologData[-2]
 PumpDataSize = PrologData[-1]
 
+dT = PrologData[17]
+
 print 'Dave'
 
 
@@ -39,16 +41,26 @@ DataTimeSize = NoNodes*NodeDataSize + NoLinks*LinkDataSize + NoPumps*PumpDataSiz
 Times = EPS_data_points / DataTimeSize
 Data = Data.reshape(Times,DataTimeSize)
 
+TimeList = np.linspace(0,Times*60,Times)/(60*60)
 NodalData = {}
 for i in range(NoNodes):
 	NodalData[str(i)] = Data[:,i*NodeDataSize:i*NodeDataSize+NodeDataSize]
 
-fig,axs = pp.subplots(2,1,sharex=True)
-axs[0].plot(NodalData['1'][:,2])
-axs[0].plot(NodalData['0'][:,2])
+fig,axs = pp.subplots(3,1,sharex=True)
+axs[0].plot(TimeList,NodalData['1'][:,2])
+axs[0].plot(TimeList,NodalData['0'][:,2])
 
-axs[1].plot(NodalData['1'][:,5])
-axs[1].plot(NodalData['0'][:,5])
+axs[1].plot(TimeList,NodalData['1'][:,0])
+axs[1].plot(TimeList,NodalData['0'][:,0])
+
+
+
+axs[2].plot(TimeList,NodalData['1'][:,5])
+axs[2].plot(TimeList,NodalData['0'][:,5])
+
+axs[0].set_ylabel('Flow')
+axs[1].set_ylabel('Head')
+axs[2].set_ylabel('Turbidity')
 pp.show()
 ### Node:: Head, Pressure, demand, balance, outflow, quality
 #print unpack('hh',f.read(4))

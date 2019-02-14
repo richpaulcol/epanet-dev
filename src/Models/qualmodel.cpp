@@ -329,13 +329,13 @@ void VCDMModel::init(Network* nw)
 {
 	
 	cout <<"VCDM\n";
-//	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
-//	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
-//	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
+	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
+	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
+	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
 //	
-	VCDM_alpha = 10.0;  
-	VCDM_beta_e = 0.001;  
-	VCDM_beta_r = 1.0;
+//	VCDM_alpha = 600.;  
+//	VCDM_beta_e = 0.0002;  
+//	VCDM_beta_r = 1.0;
 	
 
 }
@@ -343,25 +343,30 @@ void VCDMModel::init(Network* nw)
 double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
 {
   	double diam = pipe->diameter*MperFT;  //Diameter in M
-	double sf = pipe->hLoss / pipe->length;
+	double sf = pipe->hLoss / pipe->length;  // This is correct
 	double tau_applied = abs(rho*g*diam*sf/4.0);
-	
+	//cout << "\n " << pipe->length << " " << pipe->hLoss;
 	
 	if ( pipe->turbidityInitialised != true )
 	{
 		pipe->condition = tau_applied;
 		pipe->turbidityInitialised = true;
+		
 	}
 	
-	
+	//std::cout<<"\n Diameter" <<diam;
 	double tau_excess =  max(0.0,tau_applied - pipe->condition);
+	
 	cout<< "\n"<<pipe->name<<"Applied Flow "<< pipe->flow <<" Applied tau " <<tau_applied<<" Condition shear "<< pipe->condition<<"\n";
+	
 	pipe->condition += VCDM_beta_e * tau_excess * tstep;
-	double dNdT = VCDM_alpha*VCDM_beta_e * tau_excess * tstep ;
+	
+	double dNdT = VCDM_alpha * tau_excess  ;
 	//dNdT = max(0.0,dNdT);
 	//cout << dNdT<<"\n";
-	c = c + 4*dNdT / diam;//dCdT * tstep;    // c is the concentration at this point
-	
+//	c = c + 4*dNdT / diam *tstep;//dCdT * tstep;    // c is the concentration at this point
+
+	c = c + dNdT*tstep;
 	return max(0.0, c);
 }
 
