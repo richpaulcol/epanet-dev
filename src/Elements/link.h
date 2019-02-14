@@ -109,6 +109,7 @@ class Link: public Element
     double         hGrad;            //!< head loss gradient (ft/cfs)
     double         setting;          //!< current setting
     double         quality;          //!< avg. quality concen. (mass/ft3)
+    double 	   condition;         //!< podds condition shear (Pa)
 };
 
 #endif

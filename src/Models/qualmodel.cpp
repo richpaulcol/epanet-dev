@@ -327,13 +327,41 @@ VCDMModel::VCDMModel() : QualModel(VCDM)
 
 void VCDMModel::init(Network* nw)
 {
+	
 	cout <<"VCDM";
-	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
-	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
-	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
+//	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
+//	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
+//	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
+//	
+	VCDM_alpha = 1.0;  
+	VCDM_beta_e = 0.001;  
+	VCDM_beta_r = 1.0;
 	
-	
+	for (Link* link : nw->links)
+	{
+//		cout << link->diameter*MperFT<<"\n";
+//		double diam = link->diameter*MperFT;
+		//double sf = link->getUnitHeadLoss();
+//	        cout << link->flow*LPSperCFS/1000.0<<"\n";
+	        if ( link->type() != Link::PIPE ) continue;	// Working out if the link is a pipe
+        	Pipe* pipe = static_cast<Pipe *>(link);         // If it is then calculate the initial shear condition
+//	        cout << pipe->flow*LPSperCFS/1000.0<<"\n"	;
+	        double diam = pipe->diameter*MperFT;  //Diameter in M
+  		double flow = pipe->flow*LPSperCFS/1000.0; // Flow in m^3
+  		double res = pipe->resistance;
+  		double init_hLoss = res*flow;
+  		double sf = init_hLoss / pipe->length;	
+  		
+	        
+		double tau_initial = abs(rho*g*diam*sf/4.0);
+		//cout << tau_initial<<"\n";
+		link->condition=tau_initial;
+	}
 
+//	for (Link* link : nw->links)
+//	{
+//		cout << link->flow<<"\n";
+//	}
 	//reactive = setReactive(nw);
 	/*vcdmNode = nw->node(nw->option(Options::VCDM_NODE));
 	vcdmNode->quality = Cvcdm;*/
@@ -347,58 +375,26 @@ void VCDMModel::init(Network* nw)
 
 double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
 {
-	const float g   = 9.81;   /* m/s^2 */
-  	const float rho = 1000.0; /* kg/m^3 */
-  	
+//	const float g   = 9.81;   /* m/s^2 */
+//  	const float rho = 1000.0; /* kg/m^3 */
+//  	cout << tstep<<"\n";
   	double diam = pipe->diameter*MperFT;  //Diameter in M
   	double flow = pipe->flow*LPSperCFS/1000.0; // Flow in m^3
 
 	double sf = pipe->hLoss / pipe->length;
 	
 	double tau_applied = abs(rho*g*diam*sf/4.0);
-	cout << tau_applied << "\n";
+	//cout << tau_applied << "\n";
+//	cout << tau_applied << " " << pipe->condition << "\n";
 	
-	c = c + 1;//dCdT * tstep;    // c is the concentration at this point
+	double tau_excess =  tau_applied - pipe->condition;
+	cout << VCDM_beta_e * tau_excess * tstep<<"\n";
+	pipe->condition += VCDM_beta_e * tau_excess * tstep;
+	
+	double N = VCDM_alpha*VCDM_beta_e * tau_excess * tstep ;
+	c = c + 4*N / diam;//dCdT * tstep;    // c is the concentration at this point
 	
 	return max(0.0, c);
 }
 
-void VCDMModel::findMassTransCoeff(Pipe * pipe)
-{
-	massTransCoeff = 0.0;
-
-	// ... return if no wall reaction or zero diffusivity
-	if (pipe->wallCoeff == 0.0) return;
-	if (diffus == 0.0) return;
-
-	// ... compute Reynolds No.
-	double d = pipe->diameter;
-	double Re = pipe->getRe(pipe->flow, viscos);
-
-	// ... Sherwood No. for stagnant flow
-	//     (mass transfer coeff. = diffus./radius)
-	double Sh;
-	if (Re < 1.0) Sh = 2.0;
-
-	// ... Sherwood No. for turbulent flow
-	//     (from Notter-Sleicher formula) (Cussler formula)
-	else if (Re >= 2300.0)
-	{
-		//Sh = 0.0149 * pow(Re, 0.88) * pow(Sc, 0.333);
-		Sh = 0.026 * pow(Re, 0.8) * pow(Sc, 1.0 / 3.0);
-	}
-
-	// ... Sherwood No. for laminar flow
-	//     (from Graetz solution formula) (Cussler formula)
-	else
-	{
-		//double y = diam / length * Re * Sc;
-		//Sh = 3.65 + 0.0668*y / (1.0 + 0.04*pow(y, 0.667));
-		double y = Re * Sc * (d / pipe->length);
-		Sh = 1.62 * pow(y, 1.0 / 3.0);
-	}
-
-	// ... compute mass transfer coeff. (in ft/sec)
-	massTransCoeff = Sh * diffus / d;
-}
 

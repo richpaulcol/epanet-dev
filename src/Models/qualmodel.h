@@ -140,10 +140,12 @@ public:
 	VCDMModel();
 	void   init(Network* nw);
 	double pipeReact(Pipe* pipe, double c, double tstep);
-	void   findMassTransCoeff(Pipe* pipe);
 	bool   isReactive() { return reactive; }
 
 private:
+	const float g   = 9.81;   /* m/s^2 */
+  	const float rho = 1000.0; /* kg/m^3 */
+	
 	bool    reactive;         // true if chemical is reactive
 	double  diffus;           // chemical's diffusuivity (ft2/sec)
 	double  viscos;           // water kin. viscosity (ft2/sec)

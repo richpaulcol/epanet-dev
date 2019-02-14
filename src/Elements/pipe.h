@@ -65,6 +65,7 @@ class Pipe: public Link
     double bulkCoeff;        //!< bulk reaction coefficient (mass^n/sec)
     double wallCoeff;        //!< wall reaction coefficient (mass^n/sec)
     double massTransCoeff;   //!< mass transfer coefficient (mass^n/sec)
+    
  };
 
 #endif
