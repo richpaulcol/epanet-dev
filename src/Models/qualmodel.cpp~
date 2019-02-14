@@ -345,15 +345,11 @@ double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
   	double diam = pipe->diameter*MperFT;  //Diameter in M
 	double sf = pipe->hLoss / pipe->length;
 	double tau_applied = abs(rho*g*diam*sf/4.0);
-	
-	
 	if ( pipe->turbidityInitialised != true )
 	{
 		pipe->condition = tau_applied;
 		pipe->turbidityInitialised = true;
 	}
-	
-	
 	double tau_excess =  max(0.0,tau_applied - pipe->condition);
 	cout<< "\n"<<pipe->name<<"Applied Flow "<< pipe->flow <<" Applied tau " <<tau_applied<<" Condition shear "<< pipe->condition<<"\n";
 	pipe->condition += VCDM_beta_e * tau_excess * tstep;

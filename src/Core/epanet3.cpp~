@@ -107,7 +107,7 @@ int EN_runEpanet(const char* inpFile, const char* rptFile, const char* outFile)
         
         // Adding in a writing function here
         std::cout << "\n Project Name  "<< p.getNetwork() ;
-        
+        mw = p.getNetwork();
     }
 
     if ( err )

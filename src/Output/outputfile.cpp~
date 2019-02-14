@@ -94,8 +94,8 @@ int OutputFile::initWriter()
                            (IntSize + NumPumpVars * FloatSize) + FloatSize;
     cout<< "Energy Offfset "<<energyResultsOffset;
     cout<< "Network Offfset "<<networkResultsOffset;
-    cout << "Int Size " << IntSize;
-    cout << "Float Size " << FloatSize;
+    cout << "Int Size " << IntSize
+    cout << "Float Size " << FloatSize
     // ... write system info to the output file
     int sysBuf[NumSysVars];
     sysBuf[0] = MAGICNUMBER;

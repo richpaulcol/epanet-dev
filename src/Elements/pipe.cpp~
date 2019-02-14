@@ -27,7 +27,7 @@ Pipe::Pipe(string name) :
     leakCoeff2(MISSING),
     bulkCoeff(MISSING),
     wallCoeff(MISSING),
-    massTransCoeff(0.0),
+    massTransCoeff(0.0)
     turbidityInitialised(false)
 {}
 
