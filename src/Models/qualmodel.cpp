@@ -345,7 +345,9 @@ double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
   	double diam = pipe->diameter*MperFT;  //Diameter in M
 	double sf = pipe->hLoss / pipe->length;  // This is correct
 	double tau_applied = abs(rho*g*diam*sf/4.0);
-	//cout << "\n " << pipe->length << " " << pipe->hLoss;
+	//cout << "\n \n Length " << pipe->length*MperFT << " Head Loss " << pipe->hLoss*MperFT << " sf " << sf;
+	
+	//cout << "\n From  " << pipe->fromNode->head*MperFT - pipe->toNode->head*MperFT ;
 	
 	if ( pipe->turbidityInitialised != true )
 	{
@@ -355,13 +357,16 @@ double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
 	}
 	
 	//std::cout<<"\n Diameter" <<diam;
-	double tau_excess =  max(0.0,tau_applied - pipe->condition);
-	
-	cout<< "\n"<<pipe->name<<"Applied Flow "<< pipe->flow <<" Applied tau " <<tau_applied<<" Condition shear "<< pipe->condition<<"\n";
-	
+	//tstep = 60*60;
+
+	double tau_excess =  max(0.0,(tau_applied - pipe->condition));
+
+	cout << "Time " <<tstep;
+	//cout<< "\n"<<pipe->name<<" Applied Flow "<< pipe->flow <<" Applied tau " <<tau_applied<<" Condition shear "<< pipe->condition<<"\n";
+	double dNdT = (4.0/diam) * VCDM_alpha * VCDM_beta_e* tau_excess  ;
 	pipe->condition += VCDM_beta_e * tau_excess * tstep;
 	
-	double dNdT = VCDM_alpha * tau_excess  ;
+	
 	//dNdT = max(0.0,dNdT);
 	//cout << dNdT<<"\n";
 //	c = c + 4*dNdT / diam *tstep;//dCdT * tstep;    // c is the concentration at this point

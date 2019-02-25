@@ -124742,7 +124742,7 @@ SS	123
 
 [TURBIDITY]
 ;Pipe ID,   Max Tb Vol (Cmax), Yield (Init), Gradient (k), k order  (b), Rate of supp. coeff. (P), P order (n), Regen. coeff. (P'), Regen. order  (l), 	Regen. order  (m) 
- 1, 	100 , 0.19 ,  -3   ,        1 ,           	0.005    ,                	1 ,          	0,                	0,                 	0             ;
+ 1, 	100 , 0.99 ,  -3   ,        1 ,           	0.005    ,                	1 ,          	0,                	0,                 	0             ;
 
 [SOURCES]
 ;Node            	Type        	Quality     	Pattern
