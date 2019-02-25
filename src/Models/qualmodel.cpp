@@ -70,7 +70,6 @@ ChemModel::ChemModel() : QualModel(CHEM)
 
 void ChemModel::init(Network* nw)
 {
-    cout << "Chem";
     reactive = setReactive(nw);
     // save reaction orders
     pipeOrder = nw->option(Options::BULK_ORDER);
@@ -271,7 +270,6 @@ double ChemModel::findWallRate(double kw, double d, double order, double c)
 
 void TraceModel::init(Network* nw)
 {
-    cout << "Trace";
     traceNode = nw->node(nw->option(Options::TRACE_NODE));
     traceNode->quality = Ctrace;
 }
@@ -313,26 +311,26 @@ double AgeModel::tankReact(Tank* tank, double age, double tstep)
 VCDMModel::VCDMModel() : QualModel(VCDM)
 {
 	reactive = true;       // true if chemical is reactive
-	diffus = DIFFUSIVITY;   // chemical's diffusivity (ft2/sec)
-	viscos = VISCOSITY;     // water kin. viscosity (ft2/sec)
-	Sc = 0.0;               // Schmidt number
-	VCDM_alpha = 1.0;        // pipe bulk fluid reaction order
-	VCDM_beta_e = 1.0;        // tank bulk fluid reaction order
-	VCDM_beta_r = 1.0;        // pipe wall reaction order
-	pipeUcf = 1.0;          // volume conversion factor for pipes
-	tankUcf = 1.0;          // volume conversion factor for tanks
-	cLimit = 0.001;         // min/max concentration limit (mass/ft3)
+//	diffus = DIFFUSIVITY;   // chemical's diffusivity (ft2/sec)
+//	viscos = VISCOSITY;     // water kin. viscosity (ft2/sec)
+//	Sc = 0.0;               // Schmidt number
+//	VCDM_alpha = 1.0;        // pipe bulk fluid reaction order
+//	VCDM_beta_e = 1.0;        // tank bulk fluid reaction order
+//	VCDM_beta_r = 1.0;        // pipe wall reaction order
+//	pipeUcf = 1.0;          // volume conversion factor for pipes
+//	tankUcf = 1.0;          // volume conversion factor for tanks
+//	cLimit = 0.1;         // min/max concentration limit (mass/ft3)
 }
 
 
 void VCDMModel::init(Network* nw)
 {
 	
-	cout <<"VCDM\n";
-	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
-	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
-	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
-//	
+	//cout <<"VCDM\n";
+//	VCDM_alpha = nw->option(Options::BULK_ORDER);  //fudging the input
+//	VCDM_beta_e = nw->option(Options::TANK_ORDER);  //fudging the input file
+//	VCDM_beta_r = nw->option(Options::WALL_ORDER); //fudging the input file
+////	
 //	VCDM_alpha = 600.;  
 //	VCDM_beta_e = 0.0002;  
 //	VCDM_beta_r = 1.0;
@@ -342,9 +340,13 @@ void VCDMModel::init(Network* nw)
 
 double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
 {
-  	double diam = pipe->diameter*MperFT;  //Diameter in M
-	double sf = pipe->hLoss / pipe->length;  // This is correct
-	double tau_applied = abs(rho*g*diam*sf/4.0);
+  	VCDM_alpha = 3;  
+	VCDM_beta_e = 0.00166667;  
+	VCDM_beta_r = 0.0;
+  	
+  	double diam = pipe->diameter*MperFT;  		//Diameter in M
+	double sf = pipe->hLoss / pipe->length;  	// This is correct
+	double tau_applied = abs(rho*g*diam*sf/4.0);	// Applied shear (Pa)
 	//cout << "\n \n Length " << pipe->length*MperFT << " Head Loss " << pipe->hLoss*MperFT << " sf " << sf;
 	
 	//cout << "\n From  " << pipe->fromNode->head*MperFT - pipe->toNode->head*MperFT ;
@@ -355,24 +357,29 @@ double VCDMModel::pipeReact(Pipe* pipe, double c, double tstep)
 		pipe->turbidityInitialised = true;
 		
 	}
-	
-	//std::cout<<"\n Diameter" <<diam;
-	//tstep = 60*60;
-
 	double tau_excess =  max(0.0,(tau_applied - pipe->condition));
 
 	cout << "Time " <<tstep;
 	//cout<< "\n"<<pipe->name<<" Applied Flow "<< pipe->flow <<" Applied tau " <<tau_applied<<" Condition shear "<< pipe->condition<<"\n";
-	double dNdT = (4.0/diam) * VCDM_alpha * VCDM_beta_e* tau_excess  ;
+	
+	double dN = (4.0/diam) * VCDM_alpha * VCDM_beta_e* tau_excess *tstep ;
 	pipe->condition += VCDM_beta_e * tau_excess * tstep;
 	
+	std::cout << "\n tau_a "<<tau_applied<< " tau_c "<<pipe->condition << " dN "<< dN << " dtau_c" << VCDM_beta_e * tau_excess * tstep << "\n";	
+	std::cout <<"alpha " << VCDM_alpha << " beta " << VCDM_beta_e <<"\n";
 	
-	//dNdT = max(0.0,dNdT);
-	//cout << dNdT<<"\n";
-//	c = c + 4*dNdT / diam *tstep;//dCdT * tstep;    // c is the concentration at this point
-
-	c = c + dNdT*tstep;
+	std::cout <<" c " << c << "\n";
+	c = c + dN;
+	std::cout <<" c " << c << "\n";
+	
+	
+	c=28.33;
 	return max(0.0, c);
+}
+
+double VCDMModel::tankReact(Tank* tank, double c, double tstep)
+{
+    return max(0.0, c);
 }
 
 

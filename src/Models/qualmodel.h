@@ -140,6 +140,7 @@ public:
 	VCDMModel();
 	void   init(Network* nw);
 	double pipeReact(Pipe* pipe, double c, double tstep);
+	double tankReact(Tank* tank, double c, double tstep);
 	bool   isReactive() { return reactive; }
 
 private:
